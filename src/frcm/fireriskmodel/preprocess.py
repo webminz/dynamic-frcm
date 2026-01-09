@@ -3,14 +3,15 @@ from frcm.fireriskmodel.parameters import delta_t
 import numpy as np
 
 
-def combine_obs_fct(sorted_data_obs, sorted_data_fct, parameter):
+def extract_variable(sorted_data, parameter):
     """
     generic concatenation
     """
-    obs = [getattr(obj, parameter) for obj in sorted_data_obs]
-    fct = [getattr(obj, parameter) for obj in sorted_data_fct]
-    combined = obs + fct
-    return combined
+    # obs = [getattr(obj, parameter) for obj in sorted_data_obs]
+    # fct = [getattr(obj, parameter) for obj in sorted_data_fct]
+    # combined = obs + fct
+    extracted = [getattr(obj, parameter) for obj in sorted_data]
+    return extracted
 
 
 def clean_nan(data_vector, time_vector):
@@ -38,14 +39,15 @@ def preprocess(wd: WeatherData):
     """
 
     # Should not be necessary, but data is initially sorted according to the timestamps
-    sorted_data_obs = sorted(wd.observations.data, key=lambda x: x.timestamp)
-    sorted_data_fct = sorted(wd.forecast.data, key=lambda x: x.timestamp)
+    sorted_data = sorted(wd.data, key=lambda x: x.timestamp)
+    # sorted_data_obs = sorted(wd.observations.data, key=lambda x: x.timestamp)
+    # sorted_data_fct = sorted(wd.forecast.data, key=lambda x: x.timestamp)
 
     # Combine data
-    timestamp_vector = combine_obs_fct(sorted_data_obs, sorted_data_fct, 'timestamp')
-    temp_vector = combine_obs_fct(sorted_data_obs, sorted_data_fct, 'temperature')
-    humidity_vector = combine_obs_fct(sorted_data_obs, sorted_data_fct, 'humidity')
-    wind_vector = combine_obs_fct(sorted_data_obs, sorted_data_fct, 'wind_speed')
+    timestamp_vector = extract_variable(sorted_data, 'timestamp')
+    temp_vector = extract_variable(sorted_data, 'temperature')
+    humidity_vector = extract_variable(sorted_data, 'humidity')
+    wind_vector = extract_variable(sorted_data, 'wind_speed')
 
     # Convert timestamp vector to a vector containing delta time of adjacent elements in seconds, starting at 0.
     timestamp_vector_sec = [round((timestamp - timestamp_vector[0]).total_seconds()) for timestamp in timestamp_vector]
